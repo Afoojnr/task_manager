@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:task_manager/task_provider.dart';
 import 'package:task_manager/widgets/button.dart';
 import 'package:provider/provider.dart';
+import 'package:task_manager/widgets/dialog.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({
@@ -80,7 +81,16 @@ class Categories extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final categories = context.watch<TaskState>().categories;
+    final taskState = context.watch<TaskState>();
+    final categories = taskState.categories;
+
+    Future<void> showAddCategoryDialog(BuildContext context) {
+      return showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return const AddCategoryDialog();
+          });
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +116,9 @@ class Categories extends StatelessWidget {
                             _CustomIconBtn(
                                 icon: category.value.icon,
                                 label: category.key,
-                                onPressed: () {}),
+                                onPressed: () {
+                                  taskState.setCurrentCategory(category.key);
+                                }),
                             const SizedBox(
                               width: 12,
                             )
@@ -114,7 +126,11 @@ class Categories extends StatelessWidget {
                         );
                       }),
                       _CustomIconBtn(
-                          icon: "+", label: "Add More", onPressed: () {}),
+                          icon: "+",
+                          label: "Add More",
+                          onPressed: () {
+                            showAddCategoryDialog(context);
+                          }),
                     ],
                   ),
                 ),
@@ -147,9 +163,16 @@ class TaskListView extends StatelessWidget {
         Expanded(
           child: ListView(
             children: [
-              ...currentTasks.map((task) => _TaskListTile(
-                    label: task.label,
-                    isCompleted: task.isCompleted,
+              ...currentTasks.map((task) => Column(
+                    children: [
+                      _TaskListTile(
+                        label: task.label,
+                        isCompleted: task.isCompleted,
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                    ],
                   ))
             ],
           ),
@@ -177,12 +200,13 @@ class _CustomIconBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorTheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         TextButton(
             style: TextButton.styleFrom(
               fixedSize: const Size(60, 50),
-              backgroundColor: const Color.fromARGB(255, 206, 234, 245),
+              backgroundColor: colorTheme.surfaceDim,
             ),
             onPressed: onPressed,
             child: Text(
@@ -205,8 +229,10 @@ class _TaskListTile extends StatelessWidget {
   final bool isCompleted;
   @override
   Widget build(BuildContext context) {
+    final colorTheme = Theme.of(context).colorScheme;
     return CheckboxListTile(
       value: isCompleted,
+      tileColor: colorTheme.surfaceDim,
       onChanged: (_) {},
       controlAffinity: ListTileControlAffinity.leading,
       title: Text(label),

@@ -18,7 +18,10 @@ class TaskManagerApp extends StatelessWidget {
           home: const HomePage(),
           theme: ThemeData(
             useMaterial3: true,
-            colorSchemeSeed: const Color.fromARGB(255, 5, 90, 236),
+            colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color.fromARGB(255, 5, 90, 236),
+                surfaceDim: const Color.fromARGB(255, 206, 234, 245)),
+            // colorSchemeSeed: const Color.fromARGB(255, 5, 90, 236),
           )),
     );
   }

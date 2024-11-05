@@ -11,7 +11,7 @@ class Category {
   String icon;
   List<Task>? tasks;
 
-  Category({this.icon = "📋", this.tasks});
+  Category({required this.icon, this.tasks});
 }
 
 class TaskState extends ChangeNotifier {
@@ -54,6 +54,7 @@ class TaskState extends ChangeNotifier {
   late String currentCategory;
   late List<Task> currentTasks;
 
+  // Understand this code below better. Initializer class on dart
   TaskState() {
     setCurrentCategory(categories.keys.isNotEmpty ? categories.keys.first : '');
   }
@@ -62,6 +63,11 @@ class TaskState extends ChangeNotifier {
     currentCategory = category;
     currentTasks = categories[currentCategory]?.tasks ?? [];
 
+    notifyListeners();
+  }
+
+  void addCategory({required String category, String icon = "📋"}) {
+    categories[category] = Category(icon: icon);
     notifyListeners();
   }
 }
