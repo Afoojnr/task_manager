@@ -11,6 +11,14 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future<void> showAddTaskDialog(BuildContext context) {
+      return showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return const AddTaskDialog();
+          });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Task Manager App"),
@@ -28,16 +36,14 @@ class HomePage extends StatelessWidget {
             const SizedBox(
               height: 10,
             ),
-            Expanded(child: const TaskListView()),
+            const Expanded(child: TaskListView()),
             const SizedBox(
               height: 10,
             ),
             CustomBtn(
                 label: "Add a new task",
                 hasIcon: true,
-                onPressed: () {
-                  debugPrint("Add Task");
-                }),
+                onPressed: () => showAddTaskDialog(context)),
             const SizedBox(
               height: 16,
             ),
@@ -157,12 +163,13 @@ class TaskListView extends StatelessWidget {
       children: [
         Text("$currentCategory's Tasks",
             style: textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w600)),
-        SizedBox(
+        const SizedBox(
           height: 12,
         ),
         Expanded(
           child: ListView(
             children: [
+              if (currentTasks.isEmpty) const Text('No Tasks Available'),
               ...currentTasks.map((task) => Column(
                     children: [
                       _TaskListTile(
@@ -177,15 +184,6 @@ class TaskListView extends StatelessWidget {
             ],
           ),
         ),
-        //       ListView(
-        //         children: [
-
-        // ...categories.values.first.tasks.map((task) {
-        //   return _TaskListTile();
-        // })
-        //         ],
-        //       )
-        // _TaskListTile()
       ],
     );
   }
@@ -236,7 +234,7 @@ class _TaskListTile extends StatelessWidget {
       onChanged: (_) {},
       controlAffinity: ListTileControlAffinity.leading,
       title: Text(label),
-      subtitle: Text("Nov 7 (8 am to 7pm)"),
+      subtitle: const Text("Nov 7 (8 am to 7pm)"),
     );
   }
 }

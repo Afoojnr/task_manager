@@ -44,20 +44,9 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
           const SizedBox(
             height: 4,
           ),
-          TextField(
-            onChanged: (value) => category = value,
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.only(
-                left: 10,
-              ),
-              hintText: 'Enter category',
-              filled: true,
-              fillColor: theme.colorScheme.surfaceDim,
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none),
-            ),
-          ),
+          _CustomTextField(
+              onChanged: (value) => category = value,
+              hintText: 'Enter category'),
           const SizedBox(
             height: 16,
           ),
@@ -65,20 +54,9 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
           const SizedBox(
             height: 4,
           ),
-          TextField(
-            onChanged: (value) => icon = value,
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.only(
-                left: 16,
-              ),
-              hintText: 'Icon should be emoji',
-              filled: true,
-              fillColor: theme.colorScheme.surfaceDim,
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none),
-            ),
-          ),
+          _CustomTextField(
+              onChanged: (value) => icon = value,
+              hintText: 'Icon should be emoji'),
         ],
       ),
       actions: [
@@ -97,6 +75,107 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
             },
             child: const Text("Add")),
       ],
+    );
+  }
+}
+
+class AddTaskDialog extends StatefulWidget {
+  const AddTaskDialog({super.key});
+
+  @override
+  State<AddTaskDialog> createState() => _AddTaskDialogState();
+}
+
+class _AddTaskDialogState extends State<AddTaskDialog> {
+  var taskLabelController = TextEditingController();
+
+  @override
+  void dispose() {
+    taskLabelController.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    String taskLabel = taskLabelController.text;
+
+    return Dialog.fullscreen(
+      child: Padding(
+        padding: const EdgeInsets.all(30.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            IconButton.outlined(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(
+                  Icons.arrow_back,
+                  size: 30,
+                )),
+            const SizedBox(
+              height: 30,
+            ),
+            Text(
+              "Add Task",
+              style: textTheme.headlineMedium,
+            ),
+            const SizedBox(
+              height: 12,
+            ),
+            // TODO: select category
+            Text(
+              "Label",
+              style: textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 12,
+            ),
+            _CustomTextField(
+                onChanged: (value) => taskLabel = value,
+                hintText: "Create Instagram Post"),
+            const SizedBox(
+              height: 12,
+            ),
+            Row(
+              children: [
+                Column(
+                  children: [
+                    Text("Start",
+                        style: textTheme.bodyLarge!
+                            .copyWith(fontWeight: FontWeight.bold))
+                    //TODO: DropDown with date and time picker
+                  ],
+                )
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomTextField extends StatelessWidget {
+  const _CustomTextField({required this.onChanged, required this.hintText});
+  final String hintText;
+  final ValueChanged<String> onChanged;
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextField(
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.only(
+          left: 10,
+        ),
+        hintText: hintText,
+        filled: true,
+        fillColor: theme.colorScheme.surfaceDim,
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none),
+      ),
     );
   }
 }
