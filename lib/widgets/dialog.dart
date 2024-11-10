@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager/task_provider.dart';
+import 'package:task_manager/utils.dart';
 import 'package:task_manager/widgets/button.dart';
 
 class AddCategoryDialog extends StatefulWidget {
@@ -26,13 +27,6 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
     final taskState = context.watch<TaskState>();
     String category = categoryController.text;
     String icon = iconController.text;
-
-    bool isEmoji(String input) {
-      final emojiPattern =
-          RegExp(r"^(?:[\u203C-\u3299\uD83C-\uDBFF\uDC00-\uDFFF]+)$");
-
-      return emojiPattern.hasMatch(input);
-    }
 
     return AlertDialog(
       title: const Text("Add Category"),
@@ -90,7 +84,10 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
   var taskLabelController = TextEditingController();
   String selectTimeLabel = "Select time";
   String selectDateLabel = "Select Date";
-
+  String taskLabel = "";
+  TimeOfDay selectedTime = TimeOfDay.now();
+  DateTime selectedDate = DateTime.now();
+  String taskCategory = "";
   @override
   void dispose() {
     taskLabelController.dispose();
@@ -103,25 +100,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
     final textTheme = Theme.of(context).textTheme;
     final themeColor = Theme.of(context).colorScheme;
     final taskState = context.watch<TaskState>();
-    List months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Aay',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
 
-    List daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-    String taskLabel = taskLabelController.text;
-    TimeOfDay selectedTime = TimeOfDay.now();
     return Dialog.fullscreen(
       child: Padding(
         padding: const EdgeInsets.all(30.0),
@@ -158,6 +137,13 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                   filled: true,
                   fillColor: themeColor.surfaceDim,
                 ),
+                onSelected: (value) {
+                  setState(() {
+                    if (value != null) {
+                      taskCategory = value;
+                    }
+                  });
+                },
                 menuStyle: MenuStyle(
                     backgroundColor:
                         WidgetStatePropertyAll<Color>(themeColor.surfaceDim)),
@@ -179,7 +165,9 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
             ),
 
             _CustomTextField(
-                onChanged: (value) => taskLabel = value,
+                onChanged: (value) => setState(() {
+                      taskLabel = value;
+                    }),
                 hintText: "Create Instagram Post"),
             const SizedBox(
               height: 12,
@@ -206,14 +194,15 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                                 borderRadius: BorderRadius.circular(5.0)),
                           ),
                           onPressed: () async {
-                            final DateTime? selectedDate = await showDatePicker(
+                            final DateTime? datePicker = await showDatePicker(
                                 context: context,
                                 firstDate: DateTime.now(),
                                 lastDate: DateTime(2026));
-                            if (selectedDate != null) {
+                            if (datePicker != null) {
                               setState(() {
-                                selectDateLabel =
-                                    "${daysOfWeek[selectedDate.weekday]}, ${months[selectedDate.month - 1]} ${selectedDate.day}";
+                                selectedDate = datePicker;
+                                selectDateLabel = formatDate(selectedDate);
+                                // "${daysOfWeek[selectedDate.weekday]}, ${months[selectedDate.month - 1]} ${selectedDate.day}";
                               });
                             }
                           },
@@ -241,13 +230,13 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                           onPressed: () async {
                             final TimeOfDay? timeOfDay = await showTimePicker(
                               context: context,
-                              initialTime: selectedTime,
+                              initialTime: TimeOfDay.now(),
                             );
                             if (timeOfDay != null) {
                               setState(() {
                                 selectedTime = timeOfDay;
-                                selectTimeLabel =
-                                    "${selectedTime.hour}:${selectedTime.minute}";
+                                selectTimeLabel = formatTime(selectedTime);
+                                // "${selectedTime.hour}:${selectedTime.minute}";
                               });
                             }
                           },
@@ -261,7 +250,16 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
             CustomBtn(
                 label: "Save Task",
                 onPressed: () {
-                  debugPrint("Saved Task");
+                  if (taskLabel.isNotEmpty) {
+                    taskState.addTask(
+                        label: taskLabel,
+                        category: taskCategory,
+                        time: selectedTime,
+                        date: selectedDate);
+                    Navigator.pop(context);
+                  } else {
+                    debugPrint("Please add Task Label");
+                  }
                 })
           ],
         ),

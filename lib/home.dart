@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:task_manager/task_provider.dart';
+import 'package:task_manager/utils.dart';
 import 'package:task_manager/widgets/button.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager/widgets/dialog.dart';
@@ -47,7 +48,6 @@ class HomePage extends StatelessWidget {
             const SizedBox(
               height: 16,
             ),
-         
           ],
         ),
       ),
@@ -151,13 +151,17 @@ class TaskListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final currentCategory = context.watch<TaskState>().currentCategory;
-    final currentTasks = context.watch<TaskState>().currentTasks;
+    final taskState = context.watch<TaskState>();
+    final currentCategory = taskState.currentCategory;
+    final currentTasks = taskState.currentTasks;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("$currentCategory's Tasks",
+        Text(
+            currentCategory.isEmpty
+                ? "Please Add Category"
+                : "$currentCategory's Tasks",
             style: textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(
           height: 12,
@@ -171,6 +175,8 @@ class TaskListView extends StatelessWidget {
                       _TaskListTile(
                         label: task.label,
                         isCompleted: task.isCompleted,
+                        date: task.date,
+                        time: task.time,
                       ),
                       const SizedBox(
                         height: 8,
@@ -218,19 +224,45 @@ class _CustomIconBtn extends StatelessWidget {
 
 // how to extend the Task class created
 class _TaskListTile extends StatelessWidget {
-  const _TaskListTile({required this.label, this.isCompleted = false});
+  const _TaskListTile(
+      {required this.label,
+      this.isCompleted = false,
+      required this.date,
+      required this.time});
   final String label;
   final bool isCompleted;
+  final DateTime? date;
+  final TimeOfDay? time;
   @override
   Widget build(BuildContext context) {
+    final taskState = context.watch<TaskState>();
+
     final colorTheme = Theme.of(context).colorScheme;
     return CheckboxListTile(
       value: isCompleted,
       tileColor: colorTheme.surfaceDim,
-      onChanged: (_) {},
+      secondary: IconButton(
+          onPressed: () {
+            taskState.deletTask(label);
+          },
+          icon: const Icon(
+            Icons.delete_forever_rounded,
+            color: Color.fromARGB(255, 160, 18, 8),
+          )),
+      onChanged: (_) {
+        taskState.toggleTaskStatus(label);
+      },
       controlAffinity: ListTileControlAffinity.leading,
-      title: Text(label),
-      subtitle: const Text("Nov 7 (8 am to 7pm)"),
+      title: Text(
+        label,
+        style: TextStyle(
+            decoration: isCompleted ? TextDecoration.lineThrough : null),
+      ),
+      subtitle: Text(
+        "${formatDate(date ?? DateTime.now())}  (${formatTime(time ?? TimeOfDay.now())})",
+        style: TextStyle(
+            decoration: isCompleted ? TextDecoration.lineThrough : null),
+      ),
     );
   }
 }

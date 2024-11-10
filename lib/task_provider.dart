@@ -1,17 +1,19 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class Task {
   String label;
   bool isCompleted;
+  DateTime? date;
+  TimeOfDay? time;
 
-  Task({required this.label, this.isCompleted = false});
+  Task({required this.label, this.date, this.time, this.isCompleted = false});
 }
 
 class Category {
   String icon;
-  List<Task>? tasks;
+  List<Task> tasks;
 
-  Category({required this.icon, this.tasks});
+  Category({required this.icon, required this.tasks});
 }
 
 class TaskState extends ChangeNotifier {
@@ -54,7 +56,7 @@ class TaskState extends ChangeNotifier {
   late String currentCategory;
   late List<Task> currentTasks;
 
-  // Understand this code below better. Initializer class on dart
+  // TODO: Understand this code below better. Initializer class on dart
   TaskState() {
     setCurrentCategory(categories.keys.isNotEmpty ? categories.keys.first : '');
   }
@@ -67,7 +69,32 @@ class TaskState extends ChangeNotifier {
   }
 
   void addCategory({required String category, String icon = "📋"}) {
-    categories[category] = Category(icon: icon);
+    categories[category] = Category(icon: icon, tasks: []);
+    notifyListeners();
+  }
+
+  void addTask(
+      {required String category,
+      required String label,
+      DateTime? date,
+      TimeOfDay? time}) {
+    categories[category]!
+        .tasks
+        .add(Task(label: label, isCompleted: false, date: date, time: time));
+    notifyListeners();
+  }
+
+  void toggleTaskStatus(String label) {
+    for (var task in currentTasks) {
+      if (task.label == label) {
+        task.isCompleted = !task.isCompleted;
+      }
+    }
+    notifyListeners();
+  }
+
+  void deletTask(String label) {
+    currentTasks.removeWhere((task) => task.label == label);
     notifyListeners();
   }
 }
